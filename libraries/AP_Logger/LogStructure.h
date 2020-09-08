@@ -765,6 +765,7 @@ struct PACKED log_Current {
     float    consumed_wh;
     int16_t  temperature; // degrees C * 100
     float    resistance;
+    float    power;
 };
 
 struct PACKED log_WheelEncoder {
@@ -1297,10 +1298,10 @@ struct PACKED log_Arm_Disarm {
 #define QUAT_UNITS  "s????"
 #define QUAT_MULTS  "F????"
 
-#define CURR_LABELS "TimeUS,Volt,VoltR,Curr,CurrTot,EnrgTot,Temp,Res"
-#define CURR_FMT    "Qfffffcf"
-#define CURR_UNITS  "svvA?JOw"
-#define CURR_MULTS  "F000?/?0"
+#define CURR_LABELS "TimeUS,Volt,VoltR,Curr,CurrTot,EnrgTot,Temp,Res,pwr"
+#define CURR_FMT    "Qfffffcff"
+#define CURR_UNITS  "svvA?JOw?"
+#define CURR_MULTS  "F000?/?00"
 
 #define CURR_CELL_LABELS "TimeUS,Volt,V1,V2,V3,V4,V5,V6,V7,V8,V9,V10"
 #define CURR_CELL_FMT    "QfHHHHHHHHHH"
