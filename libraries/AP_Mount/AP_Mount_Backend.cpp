@@ -6,13 +6,21 @@ extern const AP_HAL::HAL& hal;
 // set_angle_targets - sets angle targets in degrees
 void AP_Mount_Backend::set_angle_targets(float roll, float tilt, float pan)
 {
+	/*
     // set angle targets
     _angle_ef_target_rad.x = radians(roll);
     _angle_ef_target_rad.y = radians(tilt);
     _angle_ef_target_rad.z = radians(pan);
+    */
+
+	_angle_ef_target_deg.x = 0;
+	_angle_ef_target_deg.y = 0;
+	_speed_ef_target_deg.z = (10);
+
 
     // set the mode to mavlink targeting
-    _frontend.set_mode(_instance, MAV_MOUNT_MODE_MAVLINK_TARGETING);
+    //_frontend.set_mode(_instance, MAV_MOUNT_MODE_MAVLINK_TARGETING);
+	_frontend.set_mode(_instance, MAV_MOUNT_MODE_RC_TARGETING);
 }
 
 // set_roi_target - sets target location that mount should attempt to point towards
@@ -199,12 +207,14 @@ void AP_Mount_Backend::enable_follow(bool en)
 	}
 */
 
-	command_flags.enable_yaw_follow = true;
+
 
 	 if(en){
 		 _enable_follow = true;
+		 command_flags.enable_yaw_follow = true;
 	 }else{
 		 _enable_follow = false;
+		 command_flags.disable_yaw_follow = true;
 	 }
 
 }
@@ -276,12 +286,28 @@ void AP_Mount_Backend::center_yaw(){ command_flags.center_yaw = true; }
 
 void AP_Mount_Backend::look_down(){ command_flags.look_down = true; }
 
-void AP_Mount_Backend::flip_image(){ command_flags.flip_image_IR = true; }
+
 
 
 void AP_Mount_Backend::turn_camera_off(){command_flags.turn_camera_off = true; }
 
 void AP_Mount_Backend::turn_camera_on(){command_flags.turn_camera_on = true; }
+
+
+
+void AP_Mount_Backend::toggle_image_pip_heat(){command_flags.toggle_pip_heat = true; }
+
+void AP_Mount_Backend::toggle_tracking(){command_flags.toggle_tracking = true; }
+
+
+
+void AP_Mount_Backend::set_camera_zoom_in(){command_flags.camera_zoom_in = true; }
+
+void AP_Mount_Backend::set_camera_zoom_out(){command_flags.camera_zoom_out = true; }
+
+void AP_Mount_Backend::set_camera_zoom_stop(){command_flags.camera_zoom_stop = true; }
+
+
 
 
 

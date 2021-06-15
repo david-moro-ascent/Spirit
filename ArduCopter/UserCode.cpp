@@ -464,49 +464,11 @@ void Copter::Detect_Buttons(){
 
 	//CH7, CAM Button
 
-	if(g.ch_output == 0){
+	if(RC_Channels::rc_channel(CH_7)->get_radio_in() > 1800){
+		ch7_button_hold = true;
 
-		if(RC_Channels::rc_channel(CH_7)->get_radio_in() > 1800){
-			if(!ch7_button_hold){
-				if(!ch7_button_pressed){
-					ch7_button_pressed = true;
-					ch7_timer = millis();
-				}else{
-					if( (millis() - ch7_timer) > 750 ){
-						long_press_flag_ch7 = true;  //these are reset in the 10Hz loop
-						function_counter = 0;
-						ch7_button_hold = true;
-					}
-				}
-			}
-		}else{
-			if(ch7_button_pressed){
-				if(!ch7_button_hold){  //if hold was active don't do a short_press
-					short_press_flag_ch7 = true;//these are reset in the 10Hz loop
-					function_counter = 0;
-				}
-				ch7_button_hold = false;
-				ch7_button_pressed = false; //reset button press flag
-			}
-		}
-
-	}
-
-
-
-
-	if(g.ch_output == 1 or g.ch_output == 2){
-
-		if(RC_Channels::rc_channel(CH_7)->get_radio_in() > 1800){
-
-			ch7_button_hold = true;
-
-		}else{
-
-			ch7_button_hold = false;
-
-		}
-
+	}else{
+		ch7_button_hold = false;
 	}
 
 
@@ -541,30 +503,13 @@ void Copter::Detect_Buttons(){
 
 
 	//CH10, B Button
-	if(RC_Channels::rc_channel(CH_10)->get_radio_in() > 1800){
-		if(!ch10_button_hold){
-			if(!ch10_button_pressed){
-				ch10_button_pressed = true;
-				ch10_timer = millis();
-			}else{
-				if( (millis() - ch10_timer) > 750 ){
-					long_press_flag_ch10 = true;  //these are reset in the 10Hz loop
-					function_counter = 0;
-					ch10_button_hold = true;
-				}
-			}
-		}
-	}else{
-		if(ch10_button_pressed){
-			if(!ch10_button_hold){  //if hold was active don't do a short_press
-				short_press_flag_ch10 = true;//these are reset in the 10Hz loop
-				function_counter = 0;
-			}
-			ch10_button_hold = false;
-			ch10_button_pressed = false; //reset button press flag
-		}
-	}
 
+	if(RC_Channels::rc_channel(CH_10)->get_radio_in() > 1800){
+		ch10_button_hold = true;
+
+	}else{
+		ch10_button_hold = false;
+	}
 
 
 	//CH11, C Button
@@ -597,90 +542,54 @@ void Copter::Detect_Buttons(){
 
 void Copter::Decode_Buttons(){
 
-	if(g.ch_output == 0){
-
-		if(short_press_flag_ch7){
-			camera_mount.toggle_record();
-			short_press_flag_ch7 = false;
-		}
-
-		if(long_press_flag_ch7){
-			camera_mount.toggle_camera_state();
-			long_press_flag_ch7 = false;
-		}
-
-	}else if(g.ch_output == 1){
-
-		camera_mount.cam_button_output(g.ch_output);
-
-		if(ch7_button_hold){
-
-			camera_mount.cam_button_pressed(true);
-
-			if(!cam_button_press_hold){
-				camera_mount.enable_follow(false);
-				cam_button_press_hold = true;
-			}
-
-		}else{
-			camera_mount.cam_button_pressed(false);
-			cam_button_press_hold = false;
-		}
-
-	}else if(g.ch_output == 2){
-
-		camera_mount.cam_button_output(g.ch_output);
-
-		if(ch7_button_hold){
-			camera_mount.cam_button_pressed(true);
-		}else{
-			camera_mount.cam_button_pressed(false);
-		}
-
+	if(ch7_button_hold){
+		camera_mount.cam_button_pressed(true);
+	}else{
+		camera_mount.cam_button_pressed(false);
 	}
+
+
 
 
 
 	if(short_press_flag_ch9){
-		camera_mount.enable_follow(true);
-		//camera_mount.center_yaw();
+
+		if(ch7_button_hold){
+			camera_mount.toggle_image_pip_heat();
+		}else{
+			//camera_mount.center_yaw();
+			camera_mount.enable_follow(true);
+		}
+
 		short_press_flag_ch9 = false;
 	}
 
-	if(long_press_flag_ch9){
-		//camera_mount.flip_image();
-		//camera_mount.look_down();
 
-		camera_mount.enable_follow(false);
+
+	if(long_press_flag_ch9){
+
+		if(ch7_button_hold){
+			camera_mount.toggle_record();
+
+		}else{
+			camera_mount.look_down();
+		}
+
 		long_press_flag_ch9 = false;
 	}
 
 
-	if(short_press_flag_ch10){
 
-		if(g.ch_B_output != 1){
+	if(ch10_button_hold and ch7_button_hold){
+		camera_mount.set_camera_zoom_out();
 
-		camera_mount.set_mode(MAV_MOUNT_MODE_GPS_POINT);
+	}else if(ch10_button_hold){
+		camera_mount.set_camera_zoom_in();
 
-		}else{
-
-			if(zoom_out){
-				zoom_out = false;
-				camera_mount.set_camera_zoom(true);
-			}else{
-				zoom_out = true;
-				camera_mount.set_camera_zoom(false);
-			}
-		}
-
-		short_press_flag_ch10 = false;
+	}else{
+		camera_mount.set_camera_zoom_stop();
 	}
 
-	if(long_press_flag_ch10){
-		camera_mount.set_camera_point_ROI(ahrs.get_yaw());
-		gcs().send_text(MAV_SEVERITY_INFO,"ROI Selected");
-		long_press_flag_ch10 = false;
-	}
 
 
 

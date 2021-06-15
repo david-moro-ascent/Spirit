@@ -93,7 +93,13 @@ public:
 	virtual void enable_follow(bool en);
 	virtual void center_yaw();
 	virtual void look_down();
-	virtual void flip_image();
+//	virtual void flip_image();
+
+	virtual void toggle_image_pip_heat();
+	virtual void toggle_tracking();
+	virtual void set_camera_zoom_in();
+	virtual void set_camera_zoom_out();
+	virtual void set_camera_zoom_stop();
 
     bool _enable_follow;
 
@@ -155,12 +161,17 @@ protected:
     	bool turn_camera_on;
     	bool zero_zoom;
     	bool full_zoom;
-    	bool toggle_pip;
-		bool toggle_color;
-		bool default_pip_color;
-		bool flip_image_IR;
-		bool flip_image_EO;
+
 		bool enable_yaw_follow;
+		bool disable_yaw_follow;
+
+		bool toggle_pip_heat;
+		bool toggle_tracking;
+
+		bool camera_zoom_in;
+		bool camera_zoom_out;
+		bool camera_zoom_stop;
+
     	}  command_flags;
 
 private:

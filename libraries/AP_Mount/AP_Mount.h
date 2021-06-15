@@ -151,12 +151,27 @@ public:
     void look_down(uint8_t instance);
     void look_down() { look_down(_primary); }
 
-    void flip_image(uint8_t instance);
-    void flip_image() { flip_image(_primary); }
-
 
     void enable_follow(uint8_t instance, bool en);
     void enable_follow(bool en) { enable_follow(_primary, en); }
+
+
+    void toggle_image_pip_heat(uint8_t instance);
+    void toggle_image_pip_heat() { toggle_image_pip_heat(_primary); }
+
+
+    void toggle_tracking(uint8_t instance);
+    void toggle_tracking() { toggle_tracking(_primary); }
+
+
+    void set_camera_zoom_in(uint8_t instance);
+    void set_camera_zoom_in() { set_camera_zoom_in(_primary); }
+
+    void set_camera_zoom_out(uint8_t instance);
+    void set_camera_zoom_out() { set_camera_zoom_out(_primary); }
+
+    void set_camera_zoom_stop(uint8_t instance);
+    void set_camera_zoom_stop() { set_camera_zoom_stop(_primary); }
 
 
     // set_roi_target - sets target location that mount should attempt to point towards
@@ -227,6 +242,8 @@ protected:
 
         AP_Int8			_camera_speed_max;
         AP_Int8			_camera_speed_min;
+
+        AP_Int8			_camera_type;
 
         MAV_MOUNT_MODE  _mode;              // current mode (see MAV_MOUNT_MODE enum)
         struct Location _roi_target;        // roi target location

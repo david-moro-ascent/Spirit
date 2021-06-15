@@ -42,7 +42,7 @@ public:
 
 private:
 
-    void update_target_spd_from_rc();
+    void update_user_gimbal_control();
 
     void update_zoom_focus_from_rc();
 
@@ -78,6 +78,18 @@ private:
     void default_pip_color();
     void cmd_flip_image_EO();
     void cmd_flip_image_IR();
+
+    void advance_pip_heat();
+
+    void change_zoom_state();
+
+    void update_zoom();
+
+    void zoom_in_Z40TIR();
+    void zoom_out_Z40TIR();
+    void zoom_stop_Z40TIR();
+
+
 
 
     //void camera_state_trackingCam(int camera_state_cmd);
@@ -328,6 +340,7 @@ struct query_flags {
 
     uint8_t pip_state;
     uint8_t color_state;
+    uint8_t pip_heat_state;
 	bool is_recording;
 	bool state_is_video;
 	bool pip_color_hold;
@@ -338,6 +351,7 @@ uint16_t _zoom_level;
 
 bool _zooming_state_change;
 bool _query_switch;
+bool _follow_enabled;
 
 uint8_t _camera_speed_zoom_out;
 uint8_t _camera_speed_zoom_in;

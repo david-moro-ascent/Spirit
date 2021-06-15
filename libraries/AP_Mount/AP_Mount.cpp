@@ -221,6 +221,14 @@ const AP_Param::GroupInfo AP_Mount::var_info[] = {
     // @User: Standard
     AP_GROUPINFO("_CM_SPD_MIN", 21, AP_Mount, state[0]._camera_speed_min, 2),
 
+    // @Param: _TYPE
+    // @DisplayName: Mount Type
+    // @Description: Mount Type (None, Servo or MAVLink)
+    // @Values: 0:None, 1:Servo, 2:3DR Solo, 3:Alexmos Serial, 4:SToRM32 MAVLink, 5:SToRM32 Serial
+    // @RebootRequired: True
+    // @User: Standard
+    AP_GROUPINFO("_CAM_TYPE", 22, AP_Mount, state[0]._camera_type, 0),
+
     // 20 formerly _OFF_JNT
 
     // 21 formerly _OFF_ACC
@@ -783,17 +791,68 @@ void AP_Mount::enable_follow(uint8_t instance, bool en)
 
 
 
-
 // set_angle_targets - sets angle targets in degrees
-void AP_Mount::flip_image(uint8_t instance)
+void AP_Mount::toggle_image_pip_heat(uint8_t instance)
 {
     if (instance >= AP_MOUNT_MAX_INSTANCES || _backends[instance] == nullptr) {
         return;
     }
 
     // send command to backend
-    _backends[instance]->flip_image();
+    _backends[instance]->toggle_image_pip_heat();
 }
+
+// set_angle_targets - sets angle targets in degrees
+void AP_Mount::toggle_tracking(uint8_t instance)
+{
+    if (instance >= AP_MOUNT_MAX_INSTANCES || _backends[instance] == nullptr) {
+        return;
+    }
+
+    // send command to backend
+    _backends[instance]->toggle_tracking();
+}
+
+
+// set_angle_targets - sets angle targets in degrees
+void AP_Mount::set_camera_zoom_in(uint8_t instance)
+{
+    if (instance >= AP_MOUNT_MAX_INSTANCES || _backends[instance] == nullptr) {
+        return;
+    }
+
+    // send command to backend
+    _backends[instance]->set_camera_zoom_in();
+}
+
+
+// set_angle_targets - sets angle targets in degrees
+void AP_Mount::set_camera_zoom_out(uint8_t instance)
+{
+    if (instance >= AP_MOUNT_MAX_INSTANCES || _backends[instance] == nullptr) {
+        return;
+    }
+
+    // send command to backend
+    _backends[instance]->set_camera_zoom_out();
+}
+
+
+// set_angle_targets - sets angle targets in degrees
+void AP_Mount::set_camera_zoom_stop(uint8_t instance)
+{
+    if (instance >= AP_MOUNT_MAX_INSTANCES || _backends[instance] == nullptr) {
+        return;
+    }
+
+    // send command to backend
+    _backends[instance]->set_camera_zoom_stop();
+}
+
+
+
+
+
 
 
 
