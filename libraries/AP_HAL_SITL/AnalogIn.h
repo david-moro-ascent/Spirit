@@ -36,6 +36,9 @@ public:
     float board_voltage(void) override {
         return 5.0f;
     }
+    float servorail_voltage(void) override {
+        return 6.0f; // Hard-coded value. TODO, make configurable as a parameter.
+    }
 private:
     static ADCSource* _channels[SITL_INPUT_MAX_CHANNELS];
     SITL_State *_sitlState;

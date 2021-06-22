@@ -187,7 +187,7 @@ if(motors->armed()){
 	case spoolup:
 
 		//Looks for issues with startup
-		servo_voltage_watcher();
+    	servo_voltage_watcher();
 
 		//Spoolup Watcher.  Disarm if 4 seconds passes without advancing
 		if(AP_HAL::millis16() - spoolup_watcher > (uint16_t)4000){
@@ -314,7 +314,7 @@ void Copter::userhook_SlowLoop()
 	}
 
 
-	if( g.payload_weight != payload_weight){
+	if( abs( g.payload_weight - payload_weight) > 0.001 ){
 			auto_config();
 			payload_weight = g.payload_weight;
 	}
