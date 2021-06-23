@@ -41,6 +41,9 @@ void Copter::userhook_init()
 	ch11_button_hold = false;
 	ch12_button_hold = false;
 
+	_tracking_mode_on = false;
+	_tracking_active = false;
+
 	// startup spirit state
 	spirit_state = disarm;
 
@@ -91,6 +94,8 @@ void Copter::userhook_init()
    zoom_out = true;
 
    cam_button_press_hold =false;
+
+   camera_type = camera_mount.get_camera_type();
 
 
 }
@@ -550,15 +555,33 @@ void Copter::Decode_Buttons(){
 
 
 
-
-
 	if(short_press_flag_ch9){
 
 		if(ch7_button_hold){
+
 			camera_mount.toggle_image_pip_heat();
+
 		}else{
-			//camera_mount.center_yaw();
-			camera_mount.enable_follow(true);
+
+			if(_tracking_mode_on){
+
+				if(!_tracking_active){
+
+					camera_mount.start_tracking();
+
+					_tracking_active = true;
+
+				}else{
+
+					camera_mount.stop_tracking();
+					_tracking_active = false;
+				}
+
+			}else{
+
+				_tracking_active = false;
+				camera_mount.enable_follow(true);
+			}
 		}
 
 		short_press_flag_ch9 = false;
@@ -569,10 +592,27 @@ void Copter::Decode_Buttons(){
 	if(long_press_flag_ch9){
 
 		if(ch7_button_hold){
+
 			camera_mount.toggle_record();
 
 		}else{
-			camera_mount.look_down();
+
+			if(camera_type == 0){
+
+				camera_mount.look_down();
+
+			}else{
+
+				camera_mount.toggle_tracking();
+
+				if(!_tracking_mode_on){
+					_tracking_mode_on = true;
+
+				}else{
+
+					_tracking_mode_on = false;
+				}
+			}
 		}
 
 		long_press_flag_ch9 = false;

@@ -6,16 +6,12 @@ extern const AP_HAL::HAL& hal;
 // set_angle_targets - sets angle targets in degrees
 void AP_Mount_Backend::set_angle_targets(float roll, float tilt, float pan)
 {
-	/*
-    // set angle targets
-    _angle_ef_target_rad.x = radians(roll);
-    _angle_ef_target_rad.y = radians(tilt);
-    _angle_ef_target_rad.z = radians(pan);
-    */
 
-	_angle_ef_target_deg.x = 0;
-	_angle_ef_target_deg.y = 0;
-	_speed_ef_target_deg.z = (10);
+    // set angle targets
+    _angle_ef_target_deg.x = radians(roll);
+    _angle_ef_target_deg.y = radians(tilt);
+    _angle_ef_target_deg.z = radians(pan);
+
 
 
     // set the mode to mavlink targeting
@@ -300,12 +296,19 @@ void AP_Mount_Backend::toggle_image_pip_heat(){command_flags.toggle_pip_heat = t
 void AP_Mount_Backend::toggle_tracking(){command_flags.toggle_tracking = true; }
 
 
+void AP_Mount_Backend::start_tracking(){command_flags.start_tracking = true; }
+
+void AP_Mount_Backend::stop_tracking(){command_flags.stop_tracking = true; }
+
+
 
 void AP_Mount_Backend::set_camera_zoom_in(){command_flags.camera_zoom_in = true; }
 
 void AP_Mount_Backend::set_camera_zoom_out(){command_flags.camera_zoom_out = true; }
 
 void AP_Mount_Backend::set_camera_zoom_stop(){command_flags.camera_zoom_stop = true; }
+
+int8_t AP_Mount_Backend::get_camera_type(){ return _state._camera_type;  }
 
 
 

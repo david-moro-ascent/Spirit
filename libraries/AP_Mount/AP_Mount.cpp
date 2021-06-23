@@ -802,7 +802,7 @@ void AP_Mount::toggle_image_pip_heat(uint8_t instance)
     _backends[instance]->toggle_image_pip_heat();
 }
 
-// set_angle_targets - sets angle targets in degrees
+
 void AP_Mount::toggle_tracking(uint8_t instance)
 {
     if (instance >= AP_MOUNT_MAX_INSTANCES || _backends[instance] == nullptr) {
@@ -812,6 +812,32 @@ void AP_Mount::toggle_tracking(uint8_t instance)
     // send command to backend
     _backends[instance]->toggle_tracking();
 }
+
+
+// set_angle_targets - sets angle targets in degrees
+void AP_Mount::start_tracking(uint8_t instance)
+{
+    if (instance >= AP_MOUNT_MAX_INSTANCES || _backends[instance] == nullptr) {
+        return;
+    }
+
+    // send command to backend
+    _backends[instance]->start_tracking();
+}
+
+
+
+// set_angle_targets - sets angle targets in degrees
+void AP_Mount::stop_tracking(uint8_t instance)
+{
+    if (instance >= AP_MOUNT_MAX_INSTANCES || _backends[instance] == nullptr) {
+        return;
+    }
+
+    // send command to backend
+    _backends[instance]->stop_tracking();
+}
+
 
 
 // set_angle_targets - sets angle targets in degrees
@@ -850,6 +876,18 @@ void AP_Mount::set_camera_zoom_stop(uint8_t instance)
 }
 
 
+
+
+// set_angle_targets - sets angle targets in degrees
+int8_t AP_Mount::get_camera_type(uint8_t instance)
+{
+    if (instance >= AP_MOUNT_MAX_INSTANCES || _backends[instance] == nullptr) {
+        return -1;
+    }
+
+    // send command to backend
+    return _backends[instance]->get_camera_type();
+}
 
 
 

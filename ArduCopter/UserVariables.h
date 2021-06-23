@@ -70,6 +70,10 @@ bool zoom_out;
 
 bool cam_button_press_hold;
 
+int8_t camera_type;
+bool _tracking_mode_on;
+bool _tracking_active;
+
 
 enum vehicle_state{
 	disarm,

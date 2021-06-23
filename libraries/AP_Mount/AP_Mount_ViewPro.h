@@ -80,15 +80,14 @@ private:
     void cmd_flip_image_IR();
 
     void advance_pip_heat();
+    void activate_tracking();
+    void begin_tracking();
+    void end_tracking();
 
-    void change_zoom_state();
-
-    void update_zoom();
-
-    void zoom_in_Z40TIR();
-    void zoom_out_Z40TIR();
-    void zoom_stop_Z40TIR();
-
+    void update_user_tracking_control();
+    void rec_4k();
+    void stop_HD_rec();
+    void start_HD_rec();
 
 
 
@@ -240,6 +239,30 @@ private:
     };
 
 
+    struct PACKED cmd_8_byte_struct {
+        uint8_t byte1;
+        uint8_t byte2;
+        uint8_t byte3;
+        uint8_t byte4;
+        uint8_t byte5;
+        uint8_t byte6;
+        uint8_t byte7;
+        uint8_t byte8;
+    };
+
+
+    struct PACKED cmd_10_byte_struct {
+        uint8_t byte1;
+        uint8_t byte2;
+        uint8_t byte3;
+        uint8_t byte4;
+        uint8_t byte5;
+        uint8_t byte6;
+        uint8_t byte7;
+        uint8_t byte8;
+        uint8_t byte9;
+        uint8_t byte10;
+    };
 
     struct PACKED cmd_11_byte_struct {
         uint8_t byte1;
@@ -308,6 +331,59 @@ private:
     };
 
 
+    struct PACKED cmd_48_tracking_byte_struct {
+        uint8_t byte1;
+        uint8_t byte2;
+        uint8_t byte3;
+        uint8_t byte4;
+        uint8_t byte5;
+        uint8_t byte6;
+        uint8_t byte7;
+
+        int16_t x_speed;
+        int16_t y_speed;
+
+        uint8_t byte10;
+        uint8_t byte11;
+        uint8_t byte12;
+        uint8_t byte13;
+        uint8_t byte14;
+        uint8_t byte15;
+        uint8_t byte16;
+        uint8_t byte17;
+        uint8_t byte18;
+        uint8_t byte19;
+        uint8_t byte20;
+        uint8_t byte21;
+        uint8_t byte22;
+        uint8_t byte23;
+        uint8_t byte24;
+        uint8_t byte25;
+        uint8_t byte26;
+        uint8_t byte27;
+        uint8_t byte28;
+        uint8_t byte29;
+        uint8_t byte30;
+        uint8_t byte31;
+        uint8_t byte32;
+        uint8_t byte33;
+        uint8_t byte34;
+        uint8_t byte35;
+        uint8_t byte36;
+        uint8_t byte37;
+        uint8_t byte38;
+        uint8_t byte39;
+        uint8_t byte40;
+        uint8_t byte41;
+        uint8_t byte42;
+		uint8_t byte43;
+		uint8_t byte44;
+		uint8_t byte45;
+		uint8_t byte46;
+		uint8_t byte47;
+		uint8_t byte48;
+    };
+
 
 enum zoom_state{
 	ZOOM_IN,
@@ -328,6 +404,12 @@ enum rec_state{
 	PIC_MODE,
 
 }current_rec_state;
+
+enum tracking_state{
+	TRACKING_MODE_OFF,
+	TRACKING_MODE_DISENGAGED,
+	TRACKING_MODE_ENGAGED,
+}current_tracking_state;
 
 
 struct query_flags {

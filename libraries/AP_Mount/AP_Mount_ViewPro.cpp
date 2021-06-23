@@ -65,6 +65,8 @@ void AP_Mount_ViewPro::init()
     pip_heat_state = 0;
     pip_color_hold = false;
 
+    current_tracking_state = TRACKING_MODE_OFF;
+
 	command_flags.change_state = false;
 	command_flags.center_yaw = false;
 	command_flags.look_down = false;
@@ -81,6 +83,12 @@ void AP_Mount_ViewPro::init()
 	command_flags.camera_zoom_in = false;
 	command_flags.camera_zoom_out = false;
 	command_flags.camera_zoom_stop = false;
+	command_flags.start_tracking = false;
+	command_flags.toggle_rec_4K = false;
+	command_flags.start_hd_rec = false;
+	command_flags.stop_hd_rec = false;
+	command_flags.stop_tracking = false;
+
 
 	_follow_enabled = true;
 	yaw_center_reset_flag = false;
@@ -132,6 +140,11 @@ void AP_Mount_ViewPro::update()
 
         	// update gimbal motion speed targets using pilot's rc inputs
         	update_user_gimbal_control();
+
+        	if(_RC_control_enable and current_tracking_state == TRACKING_MODE_DISENGAGED){
+
+        		update_user_tracking_control();
+        	}
 
             break;
 
@@ -248,11 +261,35 @@ void AP_Mount_ViewPro::send_targeting_cmd()
 		_last_send = AP_HAL::millis();
 		return;
 
+	}else if(command_flags.start_hd_rec){
+
+		 start_HD_rec();
+
+		command_flags.start_hd_rec = false;
+		_last_send = AP_HAL::millis();
+		return;
+
+	}else if(command_flags.stop_hd_rec){
+
+		 stop_HD_rec();
+
+		command_flags.stop_hd_rec = false;
+		_last_send = AP_HAL::millis();
+		return;
+
 	}else if(command_flags.toggle_rec){
 
 		camera_state(TOGGLE_REC);
 
 		command_flags.toggle_rec = false;
+		_last_send = AP_HAL::millis();
+		return;
+
+	}else if(command_flags.toggle_rec_4K){
+
+		rec_4k();
+
+		command_flags.toggle_rec_4K = false;
 		_last_send = AP_HAL::millis();
 		return;
 
@@ -312,9 +349,34 @@ void AP_Mount_ViewPro::send_targeting_cmd()
 		_last_send = AP_HAL::millis();
 		return;
 
+	}else if(command_flags.toggle_pip_heat){
+
+		advance_pip_heat();
+
+		command_flags.toggle_pip_heat = false;
+		_last_send = AP_HAL::millis();
+		return;
+
 	}else if(command_flags.toggle_tracking){
+		activate_tracking();
 
 		command_flags.toggle_tracking = false;
+		_last_send = AP_HAL::millis();
+		return;
+
+	}else if(command_flags.start_tracking){
+
+		begin_tracking();
+
+		command_flags.start_tracking = false;
+		_last_send = AP_HAL::millis();
+		return;
+
+	}else if(command_flags.stop_tracking){
+
+		end_tracking();
+
+		command_flags.stop_tracking = false;
 		_last_send = AP_HAL::millis();
 		return;
 
@@ -598,9 +660,9 @@ void AP_Mount_ViewPro::update_user_gimbal_control(){
 
 	if(is_zero(tilt_wheel_ch->norm_input_dz()) or tilt_wheel_ch->get_control_in() <= 0){
 
-		_speed_ef_target_deg.x = 0;
-		_speed_ef_target_deg.y = 0;
-		_speed_ef_target_deg.z = 0;
+		_speed_ef_target_deg.x = 0.0;
+		_speed_ef_target_deg.y = 0.0;
+		_speed_ef_target_deg.z = 0.0;
 
 		return;
 	}
@@ -644,7 +706,19 @@ void AP_Mount_ViewPro::update_user_gimbal_control(){
 
 }
 
+void AP_Mount_ViewPro::update_user_tracking_control(){
 
+
+	const RC_Channel *left_right_ch = rc().channel(CH_1);
+	const RC_Channel *up_down_ch = rc().channel(CH_2);
+
+
+	_tracking_cursor_speed.x = left_right_ch->norm_input_dz() * 25.0;
+
+	_tracking_cursor_speed.y = up_down_ch->norm_input_dz() * 25.0;
+
+
+}
 
 
 
@@ -653,6 +727,142 @@ void AP_Mount_ViewPro::command_gimbal(){
 	////////////////////////////////////////
 	/// Send Gimbal Control Commands ///////
 	////////////////////////////////////////
+
+
+
+	if(_RC_control_enable and current_tracking_state == TRACKING_MODE_DISENGAGED){
+
+
+		// setup message to send
+		cmd_48_tracking_byte_struct toggle_tracking;
+
+		toggle_tracking.byte1 = 0x7E;
+		toggle_tracking.byte2 = 0x7E;
+		toggle_tracking.byte3 = 0x44;
+		toggle_tracking.byte4 = 0x00;
+		toggle_tracking.byte5 = 0x00;
+		toggle_tracking.byte6 = 0x71;
+		toggle_tracking.byte7 = 0x00;
+
+		toggle_tracking.x_speed = (int) _tracking_cursor_speed.x;
+		toggle_tracking.y_speed = (int) _tracking_cursor_speed.y;
+
+		toggle_tracking.byte10 = 0x00;
+		toggle_tracking.byte11 = 0x00;
+		toggle_tracking.byte12 = 0x00;
+		toggle_tracking.byte13 = 0x00;
+		toggle_tracking.byte14 = 0x00;
+		toggle_tracking.byte15 = 0x00;
+		toggle_tracking.byte16 = 0x00;
+		toggle_tracking.byte17 = 0x00;
+		toggle_tracking.byte18 = 0x00;
+		toggle_tracking.byte19 = 0x00;
+		toggle_tracking.byte20 = 0x00;
+		toggle_tracking.byte21 = 0x00;
+		toggle_tracking.byte22 = 0x00;
+		toggle_tracking.byte23 = 0x00;
+		toggle_tracking.byte24 = 0x00;
+		toggle_tracking.byte25 = 0x00;
+		toggle_tracking.byte26 = 0x00;
+		toggle_tracking.byte27 = 0x00;
+		toggle_tracking.byte28 = 0x00;
+		toggle_tracking.byte29 = 0x00;
+		toggle_tracking.byte30 = 0x00;
+		toggle_tracking.byte31 = 0x00;
+		toggle_tracking.byte32 = 0x00;
+		toggle_tracking.byte33 = 0x00;
+		toggle_tracking.byte34 = 0x00;
+		toggle_tracking.byte35 = 0x00;
+		toggle_tracking.byte36 = 0x00;
+		toggle_tracking.byte37 = 0x00;
+		toggle_tracking.byte38 = 0x00;
+		toggle_tracking.byte39 = 0x00;
+		toggle_tracking.byte40 = 0x00;
+		toggle_tracking.byte41 = 0x00;
+		toggle_tracking.byte42 = 0x00;
+		toggle_tracking.byte43 = 0x00;
+		toggle_tracking.byte44 = 0x00;
+		toggle_tracking.byte45 = 0x00;
+		toggle_tracking.byte46 = 0x00;
+		toggle_tracking.byte47 = 0x00;
+		toggle_tracking.byte48 = 0x00;
+
+		/*
+			uint8_t* send_buf = (uint8_t*)&toggle_tracking;
+			uint16_t checksum = 0;
+
+			for(uint8_t i = 0; i != 47; i++){
+				send_buf[i] = 0x00;
+			}
+
+			//Header
+			send_buf[0] = 0x7E;
+			send_buf[1] = 0x7E;
+			send_buf[2] = 0x44;
+			send_buf[5] = 0x71;
+			send_buf[13] = 0x3C;
+
+
+
+			if(_tracking_cursor_speed.x > 0){
+
+				send_buf[7] = 0x05;
+				send_buf[8] = 0x00;
+
+			}else if(_tracking_cursor_speed.x < 0){
+
+				send_buf[7] = 0xF6;
+				send_buf[8] = 0xFF;
+
+			}else{
+
+				send_buf[7] = 0x00;
+				send_buf[8] = 0x00;
+
+			}
+
+
+
+			if(_tracking_cursor_speed.y > 0){
+
+				send_buf[9] = 0x05;
+				send_buf[10] = 0x00;
+
+			}else if(_tracking_cursor_speed.y < 0){
+
+				send_buf[9] = 0xF6;
+				send_buf[10] = 0xFF;
+
+			}else{
+
+				send_buf[9] = 0x00;
+				send_buf[10] = 0x00;
+
+			}
+
+*/
+		uint8_t* send_buf = (uint8_t*)&toggle_tracking;
+		uint16_t checksum = 0;
+
+			// compute checksum
+			for (uint8_t i = 0;  i < 47 ; i++) {
+				checksum += send_buf[i];
+			}
+			send_buf[47] = (uint8_t)(checksum % 256);
+
+			if ((size_t)_port->txspace() < 47) {
+				return;
+			}
+
+			for (uint8_t i = 0;  i != 48 ; i++) {
+				_port->write(send_buf[i]);
+			}
+
+		return;
+	}
+
+
+
 
 	float _pitch_value = 0;
 	float _yaw_value = 0;
@@ -684,6 +894,7 @@ void AP_Mount_ViewPro::command_gimbal(){
 		case MAV_MOUNT_MODE_MAVLINK_TARGETING:
 		case MAV_MOUNT_MODE_GPS_POINT:
 
+
 			_pitch_value = _angle_ef_target_deg.y / 0.021972;
 			_yaw_value = _angle_ef_target_deg.z / 0.021972;
 
@@ -706,8 +917,25 @@ void AP_Mount_ViewPro::command_gimbal(){
 
 		case MAV_MOUNT_MODE_RC_TARGETING:
 
-			_pitch_value = _speed_ef_target_deg.y / 0.12207;
-			_yaw_value = _speed_ef_target_deg.z / 0.12207;
+
+			if(is_zero(_speed_ef_target_deg.y) or _speed_ef_target_deg.y == 0){
+				cmd_set_data.Ps = 0;
+			}else{
+				_pitch_value = _speed_ef_target_deg.y / 0.12207;
+				cmd_set_data.Ps = (int)_pitch_value;
+			}
+
+
+			if(is_zero(_speed_ef_target_deg.z) or _speed_ef_target_deg.z == 0){
+				cmd_set_data.Ys = 0;
+			}else{
+				_yaw_value = _speed_ef_target_deg.z / 0.12207;
+				cmd_set_data.Ys = (int)_yaw_value;
+			}
+
+
+			//_pitch_value = _speed_ef_target_deg.y / 0.12207;
+			//_yaw_value = _speed_ef_target_deg.z / 0.12207;
 
 			cmd_set_data.header1 = 0xFF;
 			cmd_set_data.header2 = 0x01;
@@ -718,21 +946,12 @@ void AP_Mount_ViewPro::command_gimbal(){
 			cmd_set_data.YM = 0x01;
 			cmd_set_data.Rs = (int)0;
 			cmd_set_data.Ra = (int)0;
-			cmd_set_data.Ps = (int)_pitch_value;
+			//cmd_set_data.Ps = (int)_pitch_value;
 			cmd_set_data.Pa = (int)0;
-			cmd_set_data.Ys = (int)_yaw_value;
+			//cmd_set_data.Ys = (int)_yaw_value;
 			cmd_set_data.Ya = (int)0;
 			cmd_set_data.crc = 0;
 
-
-/*
-			// force follow mode by not giving a control mode to Yaw
-			if(!_RC_control_enable){
-				cmd_set_data.YM = 0x00;
-				cmd_set_data.Ys = (int)0;
-				cmd_set_data.Ya = (int)0;
-			}
-*/
 
 			break;
 
@@ -797,7 +1016,9 @@ void AP_Mount_ViewPro::enable_follow_yaw(bool en){
 		_port->write(buf[i]);
 	}
 
+	if(current_tracking_state != TRACKING_MODE_DISENGAGED){
 	command_flags.center_yaw = true;
+	}
 
 	// store time of send
 	_last_send = AP_HAL::millis();
@@ -876,27 +1097,28 @@ void AP_Mount_ViewPro::zoom_camera(){
 
 	if(_state._camera_type == 2){
 
-		static cmd_9_byte_struct cmd_set_zoom_data;
+		static cmd_10_byte_struct cmd_set_zoom_data;
 
 		cmd_set_zoom_data.byte1 = 0x55;
 		cmd_set_zoom_data.byte2 = 0xAA;
-		cmd_set_zoom_data.byte3 = 0xDA;
-		cmd_set_zoom_data.byte4 = 0x03;
-		cmd_set_zoom_data.byte5 = 0xBF;
-		cmd_set_zoom_data.byte6 = 0xA5;
-		cmd_set_zoom_data.byte7 = 0x80;
-		cmd_set_zoom_data.byte8 = 0x02;
-		cmd_set_zoom_data.byte9 = 0xC1;
+		cmd_set_zoom_data.byte3 = 0x1C;
+		cmd_set_zoom_data.byte4 = 0x04;
+		cmd_set_zoom_data.byte5 = 0x00;
+		cmd_set_zoom_data.byte6 = 0x00;
+		cmd_set_zoom_data.byte7 = 0x30;
+		cmd_set_zoom_data.byte8 = 0x00;
+		cmd_set_zoom_data.byte9 = 0x00;
+		cmd_set_zoom_data.byte10 = 0x50;
 
 		if(current_zoom_state == ZOOM_IN){
 
 		}else if(current_zoom_state == ZOOM_OUT){
-			cmd_set_zoom_data.byte5 = 0x7F;
-			cmd_set_zoom_data.byte9 = 0x81;
+			cmd_set_zoom_data.byte7 = 0x20;
+			cmd_set_zoom_data.byte10 = 0x40;
 
 		}else{
-			cmd_set_zoom_data.byte5 = 0x3F;
-			cmd_set_zoom_data.byte9 = 0x41;
+			cmd_set_zoom_data.byte7 = 0x10;
+			cmd_set_zoom_data.byte10 = 0x30;
 		}
 
 
@@ -1078,9 +1300,19 @@ void AP_Mount_ViewPro::camera_state(int camera_cmd){
 
 				if(!is_recording){
 					send_buf[6] = 0x01;
+
+					if(_state._camera_type == 2){
+					command_flags.start_hd_rec = true;
+					}
+
 					is_recording = true;
 				}else{
 					send_buf[6] = 0x00;
+
+					if(_state._camera_type == 2){
+					command_flags.stop_hd_rec = true;
+					}
+
 					is_recording = false;
 				}
 				break;
@@ -1088,6 +1320,12 @@ void AP_Mount_ViewPro::camera_state(int camera_cmd){
 			case TURN_VID_OFF:
 				send_buf[6] = 0x00;
 				is_recording = false;
+
+				if(_state._camera_type == 2){
+				command_flags.stop_hd_rec = true;
+				}
+
+
 				break;
 		}
 
@@ -1178,10 +1416,214 @@ void AP_Mount_ViewPro::advance_pip_heat(){
 
 }
 
+void AP_Mount_ViewPro::activate_tracking(){
+
+	// setup message to send
+	cmd_48_byte_struct toggle_tracking;
+	uint8_t* send_buf = (uint8_t*)&toggle_tracking;
+	uint16_t checksum = 0;
+
+	for(uint8_t i = 0; i != 47; i++){
+		send_buf[i] = 0x00;
+	}
+
+	//Header
+	send_buf[0] = 0x7E;
+	send_buf[1] = 0x7E;
+	send_buf[2] = 0x44;
+	send_buf[13] = 0x3C;
+
+
+
+	if(current_tracking_state == TRACKING_MODE_OFF){
+
+		send_buf[5] = 0x71;
+		current_tracking_state = TRACKING_MODE_DISENGAGED;
+
+	}else{
+		send_buf[5] = 0x00;
+		current_tracking_state = TRACKING_MODE_OFF;
+	}
+
+
+	// compute checksum
+	for (uint8_t i = 0;  i < 47 ; i++) {
+		checksum += send_buf[i];
+	}
+	send_buf[47] = (uint8_t)(checksum % 256);
+
+	if ((size_t)_port->txspace() < 47) {
+		return;
+	}
+
+	for (uint8_t i = 0;  i != 48 ; i++) {
+		_port->write(send_buf[i]);
+	}
+
+
+
+}
+
+
+void AP_Mount_ViewPro::begin_tracking(){
+
+	// setup message to send
+	cmd_48_byte_struct toggle_tracking;
+	uint8_t* send_buf = (uint8_t*)&toggle_tracking;
+	uint16_t checksum = 0;
+
+	for(uint8_t i = 0; i != 47; i++){
+		send_buf[i] = 0x00;
+	}
+
+	//Header
+	send_buf[0] = 0x7E;
+	send_buf[1] = 0x7E;
+	send_buf[2] = 0x44;
+	send_buf[5] = 0x71;
+	send_buf[11] = 0x01;
+	send_buf[13] = 0x3C;
+
+
+
+	// compute checksum
+	for (uint8_t i = 0;  i < 47 ; i++) {
+		checksum += send_buf[i];
+	}
+	send_buf[47] = (uint8_t)(checksum % 256);
+
+	if ((size_t)_port->txspace() < 47) {
+		return;
+	}
+
+	for (uint8_t i = 0;  i != 48 ; i++) {
+		_port->write(send_buf[i]);
+	}
+
+
+
+}
 
 
 
 
+void AP_Mount_ViewPro::end_tracking(){
+
+	// setup message to send
+	cmd_48_byte_struct toggle_tracking;
+	uint8_t* send_buf = (uint8_t*)&toggle_tracking;
+	uint16_t checksum = 0;
+
+	for(uint8_t i = 0; i != 47; i++){
+		send_buf[i] = 0x00;
+	}
+
+	//Header
+	send_buf[0] = 0x7E;
+	send_buf[1] = 0x7E;
+	send_buf[2] = 0x44;
+	//send_buf[5] = 0x71;
+	send_buf[5] = 0x26;
+	send_buf[11] = 0x00;
+	//send_buf[13] = 0x3C;
+
+
+
+	// compute checksum
+	for (uint8_t i = 0;  i < 47 ; i++) {
+		checksum += send_buf[i];
+	}
+	send_buf[47] = (uint8_t)(checksum % 256);
+
+	if ((size_t)_port->txspace() < 47) {
+		return;
+	}
+
+	for (uint8_t i = 0;  i != 48 ; i++) {
+		_port->write(send_buf[i]);
+	}
+
+}
+
+
+
+void AP_Mount_ViewPro::rec_4k(){
+
+	static cmd_9_byte_struct cmd_set_zoom_zero_data;
+	cmd_set_zoom_zero_data.byte1 = 0x55;
+	cmd_set_zoom_zero_data.byte2 = 0xAA;
+	cmd_set_zoom_zero_data.byte3 = 0xDA;
+	cmd_set_zoom_zero_data.byte4 = 0x03;
+	cmd_set_zoom_zero_data.byte5 = 0xFF;
+	cmd_set_zoom_zero_data.byte6 = 0xA7;
+	cmd_set_zoom_zero_data.byte7 = 0x80;
+	cmd_set_zoom_zero_data.byte8 = 0x03;
+	cmd_set_zoom_zero_data.byte9 = 0x03;
+
+	if ((size_t)_port->txspace() <= sizeof(cmd_set_zoom_zero_data)) {
+		return;
+	}
+
+	uint8_t* buf_zoom = (uint8_t*)&cmd_set_zoom_zero_data;
+
+	for (uint8_t i = 0;  i != sizeof(cmd_set_zoom_zero_data) ; i++) {
+		_port->write(buf_zoom[i]);
+	}
+
+}
+
+
+
+void AP_Mount_ViewPro::start_HD_rec(){
+
+	static cmd_9_byte_struct cmd_set_HD_video_rec;
+	cmd_set_HD_video_rec.byte1 = 0x55;
+	cmd_set_HD_video_rec.byte2 = 0xAA;
+	cmd_set_HD_video_rec.byte3 = 0xDA;
+	cmd_set_HD_video_rec.byte4 = 0x03;
+	cmd_set_HD_video_rec.byte5 = 0xFD;
+	cmd_set_HD_video_rec.byte6 = 0xA5;
+	cmd_set_HD_video_rec.byte7 = 0x80;
+	cmd_set_HD_video_rec.byte8 = 0x02;
+	cmd_set_HD_video_rec.byte9 = 0xFF;
+
+	if ((size_t)_port->txspace() <= sizeof(cmd_set_HD_video_rec)) {
+		return;
+	}
+
+	uint8_t* buf_zoom = (uint8_t*)&cmd_set_HD_video_rec;
+
+	for (uint8_t i = 0;  i != sizeof(cmd_set_HD_video_rec) ; i++) {
+		_port->write(buf_zoom[i]);
+	}
+
+}
+
+
+void AP_Mount_ViewPro::stop_HD_rec(){
+
+	static cmd_9_byte_struct cmd_set_HD_video_rec;
+	cmd_set_HD_video_rec.byte1 = 0x55;
+	cmd_set_HD_video_rec.byte2 = 0xAA;
+	cmd_set_HD_video_rec.byte3 = 0xDA;
+	cmd_set_HD_video_rec.byte4 = 0x03;
+	cmd_set_HD_video_rec.byte5 = 0xFF;
+	cmd_set_HD_video_rec.byte6 = 0xA5;
+	cmd_set_HD_video_rec.byte7 = 0x80;
+	cmd_set_HD_video_rec.byte8 = 0x03;
+	cmd_set_HD_video_rec.byte9 = 0x01;
+
+	if ((size_t)_port->txspace() <= sizeof(cmd_set_HD_video_rec)) {
+		return;
+	}
+
+	uint8_t* buf_zoom = (uint8_t*)&cmd_set_HD_video_rec;
+
+	for (uint8_t i = 0;  i != sizeof(cmd_set_HD_video_rec) ; i++) {
+		_port->write(buf_zoom[i]);
+	}
+
+}
 
 
 /*

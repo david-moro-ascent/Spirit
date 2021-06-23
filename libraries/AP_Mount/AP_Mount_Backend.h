@@ -100,6 +100,10 @@ public:
 	virtual void set_camera_zoom_in();
 	virtual void set_camera_zoom_out();
 	virtual void set_camera_zoom_stop();
+	virtual int8_t get_camera_type();
+
+	virtual void start_tracking();
+	virtual void stop_tracking();
 
     bool _enable_follow;
 
@@ -130,6 +134,9 @@ protected:
     Vector3f    _speed_ef_target_rad;   // desired earth-frame roll, tilt and vehicle-relative pan angles in radians
     Vector3f    _speed_ef_target_deg;   // desired earth-frame roll, tilt and vehicle-relative pan angles in radians
     Vector3f	_feedback_angles_deg;
+
+    Vector3f	_tracking_cursor_speed;
+
     bool		_get_angles;
 
     Location  roi_gps_target;
@@ -167,6 +174,11 @@ protected:
 
 		bool toggle_pip_heat;
 		bool toggle_tracking;
+		bool start_tracking;
+		bool stop_tracking;
+		bool toggle_rec_4K;
+		bool start_hd_rec;
+		bool stop_hd_rec;
 
 		bool camera_zoom_in;
 		bool camera_zoom_out;

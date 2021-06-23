@@ -163,6 +163,12 @@ public:
     void toggle_tracking(uint8_t instance);
     void toggle_tracking() { toggle_tracking(_primary); }
 
+    void start_tracking(uint8_t instance);
+    void start_tracking() { start_tracking(_primary); }
+
+    void stop_tracking(uint8_t instance);
+    void stop_tracking() { stop_tracking(_primary); }
+
 
     void set_camera_zoom_in(uint8_t instance);
     void set_camera_zoom_in() { set_camera_zoom_in(_primary); }
@@ -172,6 +178,11 @@ public:
 
     void set_camera_zoom_stop(uint8_t instance);
     void set_camera_zoom_stop() { set_camera_zoom_stop(_primary); }
+
+
+    int8_t get_camera_type(uint8_t instance) ;
+    int8_t get_camera_type()  { return get_camera_type(_primary); }
+
 
 
     // set_roi_target - sets target location that mount should attempt to point towards
